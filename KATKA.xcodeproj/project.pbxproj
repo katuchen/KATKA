@@ -8,21 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		0B46354C2C25B59800890BCC /* KATKAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B46354B2C25B59800890BCC /* KATKAApp.swift */; };
-		0B46354E2C25B59800890BCC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B46354D2C25B59800890BCC /* ContentView.swift */; };
 		0B4635502C25B59900890BCC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B46354F2C25B59900890BCC /* Assets.xcassets */; };
 		0B4635532C25B59900890BCC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B4635522C25B59900890BCC /* Preview Assets.xcassets */; };
 		0B4635552C25B59900890BCC /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4635542C25B59900890BCC /* Persistence.swift */; };
 		0B4635582C25B59900890BCC /* KATKA.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0B4635562C25B59900890BCC /* KATKA.xcdatamodeld */; };
+		0B46355F2C25B5E900890BCC /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B46355E2C25B5E900890BCC /* HomeScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0B4635482C25B59800890BCC /* KATKA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KATKA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B46354B2C25B59800890BCC /* KATKAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KATKAApp.swift; sourceTree = "<group>"; };
-		0B46354D2C25B59800890BCC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		0B46354F2C25B59900890BCC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B4635522C25B59900890BCC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		0B4635542C25B59900890BCC /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		0B4635572C25B59900890BCC /* KATKA.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = KATKA.xcdatamodel; sourceTree = "<group>"; };
+		0B46355E2C25B5E900890BCC /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,7 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				0B46354B2C25B59800890BCC /* KATKAApp.swift */,
-				0B46354D2C25B59800890BCC /* ContentView.swift */,
+				0B46355E2C25B5E900890BCC /* HomeScreen.swift */,
 				0B46354F2C25B59900890BCC /* Assets.xcassets */,
 				0B4635542C25B59900890BCC /* Persistence.swift */,
 				0B4635562C25B59900890BCC /* KATKA.xcdatamodeld */,
@@ -143,8 +143,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B46355F2C25B5E900890BCC /* HomeScreen.swift in Sources */,
 				0B4635552C25B59900890BCC /* Persistence.swift in Sources */,
-				0B46354E2C25B59800890BCC /* ContentView.swift in Sources */,
 				0B4635582C25B59900890BCC /* KATKA.xcdatamodeld in Sources */,
 				0B46354C2C25B59800890BCC /* KATKAApp.swift in Sources */,
 			);
