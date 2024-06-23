@@ -245,12 +245,12 @@ class DataViewModel : ObservableObject {
 		}
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
-		  URLQueryItem(name: "sort", value: "begin_at"),
-		  URLQueryItem(name: "page", value: "1"),
-		  URLQueryItem(name: "per_page", value: "50"),
+			URLQueryItem(name: "sort", value: "begin_at"),
+			URLQueryItem(name: "page", value: "1"),
+			URLQueryItem(name: "per_page", value: "50"),
 		]
 		components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
-
+		
 		var request = URLRequest(url: components.url ?? url)
 		request.httpMethod = "GET"
 		request.timeoutInterval = 10
@@ -278,8 +278,6 @@ class DataViewModel : ObservableObject {
 			})
 			.store(in: &cancellables)
 	}
-	
-	
 }
 
 struct HomeScreen: View {
@@ -289,17 +287,17 @@ struct HomeScreen: View {
 		ScrollView {
 			VStack {
 				ForEach(vm.matches) { match in
-					VStack {
-						LeagueView(
-							logoURL: match.league?.imageURL,
-							leagueName: match.league?.name ?? "",
-							tournamentName: match.name ?? "",
-							seriesName: match.serie?.fullName ?? ""
-						)
-						MatchView(match: match)
-					}
+					let league = match.league
+					let tournament = match.tournament
+					let series = match.serie
+					LeagueView(
+						logoURL: league?.imageURL,
+						leagueName: league?.name ?? "",
+						tournamentName: tournament?.name ?? "",
+						seriesName: series?.name ?? ""
+					)
+					MatchView(match: match)
 				}
-				.padding()
 			}
 		}
 	}
@@ -343,12 +341,16 @@ struct MatchView : View {
 	var body: some View {
 		let opponentFirst = match.opponents.first?.opponent
 		let opponentSecond = match.opponents.last?.opponent
-
+		
 		HStack {
 			OpponentView(opponentName: opponentFirst?.name ?? "", logoURL: opponentFirst?.imageURL)
+			Spacer()
 			CentralInfoView(matchDate: match.beginAt ?? "Unknown", matchType: match.matchType ?? "", numberOfGames: match.numberOfGames ?? 0)
+			Spacer()
 			OpponentView(opponentName: opponentSecond?.name ?? "", logoURL: opponentSecond?.imageURL)
 		}
+		.frame(maxWidth: .infinity, alignment: .center)
+		.padding()
 	}
 }
 
@@ -371,7 +373,11 @@ struct OpponentView : View {
 				.font(.title3)
 				.fontWeight(.light)
 				.foregroundStyle(.primary)
+				.frame(maxWidth: 200)
 		}
+		.font(.title3)
+		.fontWeight(.light)
+		.multilineTextAlignment(.center)
 	}
 }
 
@@ -382,9 +388,30 @@ struct CentralInfoView : View {
 	
 	var body: some View {
 		VStack {
-			Text("\(matchDate)")
+			Text("\(getDate(from: matchDate))")
+			Text("\(getTime(from: matchDate))")
+				.font(.title)
 			Text("\(matchType)\(numberOfGames)")
 		}
+		.font(.subheadline)
+	}
+}
+
+extension CentralInfoView {
+	func getDate(from stringDate: String) -> String {
+		let formatter = DateFormatter()
+		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+		let realDate = formatter.date(from: stringDate)
+		formatter.dateFormat = "MMM d"
+		return formatter.string(from: realDate ?? Date())
+	}
+	
+	func getTime(from stringDate: String) -> String {
+		let formatter = DateFormatter()
+		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+		let realDate = formatter.date(from: stringDate)
+		formatter.dateFormat = "HH:mm"
+		return formatter.string(from: realDate ?? Date())
 	}
 }
 
