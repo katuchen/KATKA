@@ -9,12 +9,12 @@ struct MatchModel : Identifiable, Codable {
 	let detailedStats, draw: Bool?
 	let forfeit: Bool?
 	let id: Int
-	let league: LeagueModel
+	let league: LeagueModel?
 	let leagueID: Int?
 	let matchType: String?
 	let name: String?
 	let numberOfGames: Int?
-	let opponents: [OpponentElement]?
+	let opponents: [OpponentElement]
 	let results: [ResultsModel]?
 	let serie: SeriesModel?
 	let serieID: Int?
@@ -22,7 +22,6 @@ struct MatchModel : Identifiable, Codable {
 	let tournament: TournamentModel?
 	let tournamentID: Int?
 	let videogame: VideogameModel?
-	let videogameVersion : String?
 	let winnerID: Int?
 	let winnerType: String?
 	enum CodingKeys: String, CodingKey {
@@ -46,7 +45,6 @@ struct MatchModel : Identifiable, Codable {
 		case tournament
 		case tournamentID = "tournament_id"
 		case videogame
-		case videogameVersion = "videogame_version"
 		case winnerID = "winner_id"
 		case winnerType = "winner_type"
 	}
@@ -96,13 +94,11 @@ struct SeriesModel : Identifiable, Codable {
 struct VideogameModel : Identifiable, Codable {
 	let id: Int
 	let name, slug: String?
-	let currentVersion: String?
 	
 	enum CodingKeys: String, CodingKey {
 		case id
 		case name
 		case slug
-		case currentVersion = "current_version"
 	}
 }
 
@@ -110,7 +106,7 @@ struct TournamentModel : Identifiable, Codable {
 	let id : Int
 	let name : String?
 	let beginAt, endAt : String?
-	let detailedStats : Bool
+	let detailedStats : Bool?
 	let league : LeagueModel?
 	let leagueID : Int?
 	let matches : [MatchModel]?
@@ -147,11 +143,11 @@ struct TournamentModel : Identifiable, Codable {
 
 struct OpponentElement : Codable {
 	let opponentType: String?
-	let opponents: [OpponentModel]?
+	let opponent: OpponentModel
 	
 	enum CodingKeys: String, CodingKey {
 		case opponentType = "opponent_type"
-		case opponents
+		case opponent
 	}
 }
 
@@ -159,7 +155,7 @@ struct OpponentModel : Identifiable, Codable {
 	let acronym: String?
 	let currentVideogame: VideogameModel?
 	let id: Int
-	let imageURL: String?
+	let imageURL: URL?
 	let name: String?
 	let players: [PlayerModel]?
 	let slug: String?
@@ -237,12 +233,25 @@ enum WinnerType : String {
 class DataViewModel : ObservableObject {
 	@Published var matches : [MatchModel] = []
 	
+	var cancellables = Set<AnyCancellable>()
+	
 	init() {
-		getData()
+		getMatches()
 	}
-	func getData() {
-		let url = URL(string: "https://api.pandascore.co/matches")!
-		var request = URLRequest(url: url)
+	func getMatches() {
+		guard let url = URL(string: "https://api.pandascore.co/matches") else {
+			print("URL ERROR")
+			return
+		}
+		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+		let queryItems: [URLQueryItem] = [
+		  URLQueryItem(name: "sort", value: "begin_at"),
+		  URLQueryItem(name: "page", value: "1"),
+		  URLQueryItem(name: "per_page", value: "50"),
+		]
+		components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+
+		var request = URLRequest(url: components.url ?? url)
 		request.httpMethod = "GET"
 		request.timeoutInterval = 10
 		request.allHTTPHeaderFields = [
@@ -267,8 +276,10 @@ class DataViewModel : ObservableObject {
 			}, receiveValue: { [weak self] returnedData in
 				self?.matches = returnedData
 			})
-		
+			.store(in: &cancellables)
 	}
+	
+	
 }
 
 struct HomeScreen: View {
@@ -277,9 +288,18 @@ struct HomeScreen: View {
 	var body: some View {
 		ScrollView {
 			VStack {
-				ForEach(vm.matches) {match in
-					LeagueView(logoURL: match.league.imageURL, leagueName: match.league.name ?? "", tournamentName: match.tournament?.name ?? "", seriesName: match.serie?.fullName ?? "")
+				ForEach(vm.matches) { match in
+					VStack {
+						LeagueView(
+							logoURL: match.league?.imageURL,
+							leagueName: match.league?.name ?? "",
+							tournamentName: match.name ?? "",
+							seriesName: match.serie?.fullName ?? ""
+						)
+						MatchView(match: match)
+					}
 				}
+				.padding()
 			}
 		}
 	}
@@ -297,7 +317,7 @@ struct LeagueView : View {
 				image
 					.resizable()
 					.scaledToFit()
-					.frame(width: 20, height: 20, alignment: .leadingFirstTextBaseline)
+					.frame(width: 20, height: 20)
 			} placeholder: {
 				Image(systemName: "circle.fill")
 					.foregroundStyle(Color(.systemBlue))
@@ -305,7 +325,7 @@ struct LeagueView : View {
 			}
 			.frame(width: 20, height: 20)
 			Text("\(leagueName) \(tournamentName) \(seriesName)")
-				.multilineTextAlignment(.center)
+				.multilineTextAlignment(.leading)
 		}
 		.padding()
 		.font(.subheadline)
@@ -315,6 +335,56 @@ struct LeagueView : View {
 		.background(RoundedRectangle(cornerRadius: 10).fill(Color(.secondarySystemBackground)))
 		.shadow(color: Color(.secondarySystemBackground), radius: 10)
 		.padding()
+	}
+}
+
+struct MatchView : View {
+	let match : MatchModel
+	var body: some View {
+		let opponentFirst = match.opponents.first?.opponent
+		let opponentSecond = match.opponents.last?.opponent
+
+		HStack {
+			OpponentView(opponentName: opponentFirst?.name ?? "", logoURL: opponentFirst?.imageURL)
+			CentralInfoView(matchDate: match.beginAt ?? "Unknown", matchType: match.matchType ?? "", numberOfGames: match.numberOfGames ?? 0)
+			OpponentView(opponentName: opponentSecond?.name ?? "", logoURL: opponentSecond?.imageURL)
+		}
+	}
+}
+
+struct OpponentView : View {
+	let opponentName : String
+	let logoURL : URL?
+	var body: some View {
+		VStack {
+			AsyncImage(url: logoURL) { image in
+				image
+					.resizable()
+					.scaledToFit()
+					.frame(width: 50, height: 50, alignment: .leadingFirstTextBaseline)
+			} placeholder: {
+				Image(systemName: "gamecontroller.fill")
+					.foregroundStyle(Color(.systemBlue))
+					.frame(width: 50, height: 50)
+			}
+			Text(opponentName)
+				.font(.title3)
+				.fontWeight(.light)
+				.foregroundStyle(.primary)
+		}
+	}
+}
+
+struct CentralInfoView : View {
+	let matchDate : String
+	let matchType : String
+	let numberOfGames : Int
+	
+	var body: some View {
+		VStack {
+			Text("\(matchDate)")
+			Text("\(matchType)\(numberOfGames)")
+		}
 	}
 }
 
