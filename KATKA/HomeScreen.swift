@@ -198,7 +198,7 @@ struct PlayerModel : Identifiable, Codable {
 struct ResultsModel : Codable {
 	let score: Int?
 	let teamID: Int?
-	let playerID: String?
+	let playerID: Int?
 	
 	enum CodingKeys: String, CodingKey {
 		case score
@@ -245,7 +245,8 @@ class DataViewModel : ObservableObject {
 		}
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
-			URLQueryItem(name: "sort", value: "begin_at"),
+			URLQueryItem(name: "range[begin_at]", value: "2024-06-23T00:00:00Z,2024-06-23T23:59:59Z"),
+			//URLQueryItem(name: "sort", value: "begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
 		]
@@ -401,6 +402,7 @@ extension CentralInfoView {
 	func getDate(from stringDate: String) -> String {
 		let formatter = DateFormatter()
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+		formatter.timeZone = .gmt
 		let realDate = formatter.date(from: stringDate)
 		formatter.dateFormat = "MMM d"
 		return formatter.string(from: realDate ?? Date())
@@ -409,6 +411,7 @@ extension CentralInfoView {
 	func getTime(from stringDate: String) -> String {
 		let formatter = DateFormatter()
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+		formatter.timeZone = .gmt
 		let realDate = formatter.date(from: stringDate)
 		formatter.dateFormat = "HH:mm"
 		return formatter.string(from: realDate ?? Date())
