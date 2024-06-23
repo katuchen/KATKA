@@ -245,8 +245,9 @@ class DataViewModel : ObservableObject {
 		}
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
+			URLQueryItem(name: "sort", value: "-tier"),
 			URLQueryItem(name: "range[begin_at]", value: "2024-06-23T00:00:00Z,2024-06-23T23:59:59Z"),
-			//URLQueryItem(name: "sort", value: "begin_at"),
+			URLQueryItem(name: "sort", value: "begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
 		]
@@ -285,22 +286,34 @@ struct HomeScreen: View {
 	@StateObject var vm = DataViewModel()
 	
 	var body: some View {
-		ScrollView {
-			VStack {
+		ScrollView(content: {
+			LazyVStack (spacing: 20) {
 				ForEach(vm.matches) { match in
 					let league = match.league
 					let tournament = match.tournament
 					let series = match.serie
-					LeagueView(
-						logoURL: league?.imageURL,
-						leagueName: league?.name ?? "",
-						tournamentName: tournament?.name ?? "",
-						seriesName: series?.name ?? ""
+					LazyVStack (spacing: 0) {
+						HStack {
+							LeagueView(
+								logoURL: league?.imageURL,
+								leagueName: league?.name ?? "",
+								tournamentName: tournament?.name ?? "",
+								seriesName: series?.name ?? ""
+							)
+						}
+						MatchView(match: match)
+					}
+					.background(
+						RoundedRectangle(cornerRadius: 10)
+							.fill(Color(.secondarySystemBackground))
+							.stroke(.secondary.opacity(0.1))
 					)
-					MatchView(match: match)
+					.shadow(color: Color(.quaternarySystemFill).opacity(0.3), radius: 5, y: 10)
+					.padding(.horizontal, 20)
 				}
 			}
 		}
+		)
 	}
 }
 
@@ -311,28 +324,28 @@ struct LeagueView : View {
 	let seriesName : String
 	
 	var body: some View {
-		HStack {
-			AsyncImage(url: logoURL) { image in
-				image
-					.resizable()
-					.scaledToFit()
-					.frame(width: 20, height: 20)
-			} placeholder: {
-				Image(systemName: "circle.fill")
-					.foregroundStyle(Color(.systemBlue))
-					.frame(width: 20, height: 20)
-			}
-			.frame(width: 20, height: 20)
-			Text("\(leagueName) \(tournamentName) \(seriesName)")
-				.multilineTextAlignment(.leading)
+		//		AsyncImage(url: logoURL) { image in
+		//			image
+		//				.resizable()
+		//				.scaledToFit()
+		//				.frame(width: 20, height: 20)
+		//		} placeholder: {
+		//			Image(systemName: "circle.fill")
+		//				.foregroundStyle(Color(.systemBlue))
+		//				.frame(width: 20, height: 20)
+		//		}
+		//		.frame(width: 20, height: 20)
+		VStack {
+			Text("\(leagueName)")
+				.font(.subheadline)
+				.foregroundStyle(Color(.label))
+				.bold()
+			Text("\(seriesName) \(tournamentName)")
 		}
-		.padding()
-		.font(.subheadline)
-		.fontWeight(.semibold)
-		.foregroundStyle(.primary)
-		.frame(maxWidth: .infinity, alignment: .center)
-		.background(RoundedRectangle(cornerRadius: 10).fill(Color(.secondarySystemBackground)))
-		.shadow(color: Color(.secondarySystemBackground), radius: 10)
+		.font(.caption)
+		.foregroundStyle(Color(.secondaryLabel))
+		.multilineTextAlignment(.center)
+		.lineLimit(1)
 		.padding()
 	}
 }
@@ -342,63 +355,92 @@ struct MatchView : View {
 	var body: some View {
 		let opponentFirst = match.opponents.first?.opponent
 		let opponentSecond = match.opponents.last?.opponent
-		
 		HStack {
-			OpponentView(opponentName: opponentFirst?.name ?? "", logoURL: opponentFirst?.imageURL)
+			OpponentView(
+				opponentName: opponentFirst?.name ?? "",
+				logoURL: opponentFirst?.imageURL
+			)
 			Spacer()
-			CentralInfoView(matchDate: match.beginAt ?? "Unknown", matchType: match.matchType ?? "", numberOfGames: match.numberOfGames ?? 0)
+			CentralInfoView(
+				league: match.league?.name ?? "",
+				matchDate: match.beginAt ?? "Unknown",
+				matchType: match.matchType ?? "",
+				numberOfGames: match.numberOfGames ?? 0,
+				status: match.status ?? "",
+				results: match.results ?? []
+			)
 			Spacer()
-			OpponentView(opponentName: opponentSecond?.name ?? "", logoURL: opponentSecond?.imageURL)
+			OpponentView(
+				opponentName: opponentSecond?.name ?? "",
+				logoURL: opponentSecond?.imageURL
+			)
 		}
-		.frame(maxWidth: .infinity, alignment: .center)
-		.padding()
+		.padding(.vertical, 10)
 	}
 }
 
 struct OpponentView : View {
+	@State var isTruncated: Bool = false
 	let opponentName : String
 	let logoURL : URL?
+	
 	var body: some View {
 		VStack {
 			AsyncImage(url: logoURL) { image in
 				image
 					.resizable()
 					.scaledToFit()
-					.frame(width: 50, height: 50, alignment: .leadingFirstTextBaseline)
+					.frame(width: 50, height: 50, alignment: .center)
 			} placeholder: {
 				Image(systemName: "gamecontroller.fill")
 					.foregroundStyle(Color(.systemBlue))
 					.frame(width: 50, height: 50)
 			}
 			Text(opponentName)
-				.font(.title3)
+				.font(.caption)
 				.fontWeight(.light)
-				.foregroundStyle(.primary)
+				.foregroundStyle(Color(.label))
+				.padding(.horizontal, 10)
 				.frame(maxWidth: 200)
 		}
 		.font(.title3)
 		.fontWeight(.light)
+		.lineLimit(1)
 		.multilineTextAlignment(.center)
 	}
 }
 
 struct CentralInfoView : View {
-	let matchDate : String
-	let matchType : String
-	let numberOfGames : Int
+	let league : String
+	let matchDate: String
+	let matchType: String
+	let numberOfGames: Int
+	let status: String
+	let results: [ResultsModel]
 	
 	var body: some View {
 		VStack {
-			Text("\(getDate(from: matchDate))")
-			Text("\(getTime(from: matchDate))")
-				.font(.title)
-			Text("\(matchType)\(numberOfGames)")
+			if status == "finished" {
+				let resultFirst = results.first?.score
+				let resultSecond = results.last?.score
+				Text("\(resultFirst ?? 000) - \(resultSecond ?? 000)")
+					.font(.title)
+			} else {
+				Text("\(getDate(from: matchDate))")
+					.font(.subheadline)
+					.foregroundStyle(Color(.secondaryLabel))
+				Text("\(getTime(from: matchDate))")
+					.font(.title)
+			}
+			Text("\(matchType == "best_of" ? "BO" : "")\(numberOfGames)")
+				.font(.subheadline)
+				.foregroundStyle(Color(.secondaryLabel))
 		}
-		.font(.subheadline)
 	}
 }
 
 extension CentralInfoView {
+	
 	func getDate(from stringDate: String) -> String {
 		let formatter = DateFormatter()
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
