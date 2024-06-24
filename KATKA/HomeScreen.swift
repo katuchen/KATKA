@@ -233,7 +233,7 @@ enum WinnerType : String {
 	case player = "Player"
 }
 
-// MARK: Data Extensions
+// MARK: Logo Color Extensions
 extension UIImage {
 	func getDominantColor() -> UIColor {
 		let defaultColor : UIColor = UIColor(red: 0, green: 0, blue: 100, alpha: 1)
@@ -332,7 +332,7 @@ struct HomeScreen: View {
 	
 	var body: some View {
 		ZStack {
-			RadialGradient(colors: [.blue, .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+			//RadialGradient(colors: [.blue, .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
 			ScrollView(content: {
 				LazyVStack (spacing: 20) {
 					ForEach(vm.matches) { match in
@@ -530,10 +530,11 @@ struct CentralInfoView : View {
 				Text("\(resultFirst ?? 000) - \(resultSecond ?? 000)")
 					.font(.title)
 			} else {
-				Text("\(getDate(from: matchDate))")
+				let matchRealDate = getRealDate(stringDate: matchDate)
+				Text("\(getDate(from: matchRealDate))")
 					.font(.subheadline)
 					.foregroundStyle(Color(.secondaryLabel))
-				Text("\(getTime(from: matchDate))")
+				Text("\(getTime(from: matchRealDate))")
 					.font(.title)
 			}
 			Text("\(matchType == "best_of" ? "BO" : "")\(numberOfGames)")
@@ -545,22 +546,22 @@ struct CentralInfoView : View {
 
 extension CentralInfoView {
 	
-	func getDate(from stringDate: String) -> String {
+	func getRealDate(stringDate: String) -> Date {
 		let formatter = DateFormatter()
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
 		formatter.timeZone = .gmt
 		let realDate = formatter.date(from: stringDate)
-		formatter.dateFormat = "MMM d"
-		return formatter.string(from: realDate ?? Date())
+		return realDate ?? Date()
 	}
 	
-	func getTime(from stringDate: String) -> String {
-		let formatter = DateFormatter()
-		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-		formatter.timeZone = .gmt
-		let realDate = formatter.date(from: stringDate)
+	func getDate(from date: Date, formatter : DateFormatter = DateFormatter()) -> String {
+		formatter.dateFormat = "MMM d"
+		return formatter.string(from: date)
+	}
+	
+	func getTime(from date: Date, formatter : DateFormatter = DateFormatter()) -> String {
 		formatter.dateFormat = "HH:mm"
-		return formatter.string(from: realDate ?? Date())
+		return formatter.string(from: date)
 	}
 }
 
