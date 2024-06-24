@@ -1,8 +1,11 @@
 import SwiftUI
 import Foundation
 import Combine
+import CoreImage
+import CoreImage.CIFilterBuiltins
+import UIKit
 
-// Data Model
+// MARK: Data Model
 
 struct MatchModel : Identifiable, Codable {
 	let beginAt, endAt: String?
@@ -230,6 +233,46 @@ enum WinnerType : String {
 	case player = "Player"
 }
 
+// MARK: Data Extensions
+extension UIImage {
+	func getDominantColor() -> UIColor {
+		let defaultColor : UIColor = UIColor(red: 0, green: 0, blue: 100, alpha: 1)
+		guard let inputImage = CIImage(image: self) else { return defaultColor }
+		let extentVector = CIVector(x: inputImage.extent.origin.x, y: inputImage.extent.origin.y, z: inputImage.extent.size.width, w: inputImage.extent.size.height)
+		
+		guard let filter = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: inputImage, kCIInputExtentKey: extentVector]) else { return defaultColor }
+		guard let outputImage = filter.outputImage else { return defaultColor }
+		
+		var bitmap = [UInt8](repeating: 0, count: 4)
+		let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
+		context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
+		
+		return UIColor(red: CGFloat(bitmap[0]) / 255, green: CGFloat(bitmap[1]) / 255, blue: CGFloat(bitmap[2]) / 255, alpha: CGFloat(bitmap[3]) / 255)
+	}
+}
+
+extension UIColor {
+	func getHSBComponents() -> (hue: CGFloat, saturation: CGFloat, brightness: CGFloat, alpha: CGFloat) {
+		var hue: CGFloat = 0
+		var saturation: CGFloat = 0
+		var brightness: CGFloat = 0
+		var alpha: CGFloat = 0
+		self.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+		return (hue, saturation, brightness, alpha)
+	}
+	
+	func adjustedForBrightness() -> UIColor {
+		let hsb = self.getHSBComponents()
+		let brightnessThreshold: CGFloat = 0.5
+		if hsb.brightness > brightnessThreshold {
+			return UIColor(hue: hsb.hue, saturation: hsb.saturation, brightness: brightnessThreshold, alpha: hsb.alpha)
+		}
+		return self
+	}
+}
+
+// MARK: View Model
+
 class DataViewModel : ObservableObject {
 	@Published var matches : [MatchModel] = []
 	
@@ -246,7 +289,7 @@ class DataViewModel : ObservableObject {
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "sort", value: "-tier"),
-			URLQueryItem(name: "range[begin_at]", value: "2024-06-23T00:00:00Z,2024-06-23T23:59:59Z"),
+			URLQueryItem(name: "range[begin_at]", value: "2024-06-24T00:00:00Z,2024-06-24T23:59:59Z"),
 			URLQueryItem(name: "sort", value: "begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
@@ -282,38 +325,38 @@ class DataViewModel : ObservableObject {
 	}
 }
 
+// MARK: Views
+
 struct HomeScreen: View {
 	@StateObject var vm = DataViewModel()
 	
 	var body: some View {
-		ScrollView(content: {
-			LazyVStack (spacing: 20) {
-				ForEach(vm.matches) { match in
-					let league = match.league
-					let tournament = match.tournament
-					let series = match.serie
-					LazyVStack (spacing: 0) {
-						HStack {
-							LeagueView(
-								logoURL: league?.imageURL,
-								leagueName: league?.name ?? "",
-								tournamentName: tournament?.name ?? "",
-								seriesName: series?.name ?? ""
-							)
+		ZStack {
+			RadialGradient(colors: [.blue, .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+			ScrollView(content: {
+				LazyVStack (spacing: 20) {
+					ForEach(vm.matches) { match in
+						let league = match.league
+						let tournament = match.tournament
+						let series = match.serie
+						LazyVStack (spacing: 0) {
+							HStack {
+								LeagueView(
+									logoURL: league?.imageURL,
+									leagueName: league?.name ?? "",
+									tournamentName: tournament?.name ?? "",
+									seriesName: series?.name ?? ""
+								)
+							}
+							MatchView(match: match)
 						}
-						MatchView(match: match)
+						.padding(.horizontal, 20)
 					}
-					.background(
-						RoundedRectangle(cornerRadius: 10)
-							.fill(Color(.secondarySystemBackground))
-							.stroke(.secondary.opacity(0.1))
-					)
-					.shadow(color: Color(.quaternarySystemFill).opacity(0.3), radius: 5, y: 10)
-					.padding(.horizontal, 20)
 				}
+				//.background(.background)
 			}
+			)
 		}
-		)
 	}
 }
 
@@ -352,13 +395,17 @@ struct LeagueView : View {
 
 struct MatchView : View {
 	let match : MatchModel
+	@State private var primaryColor1: Color = .clear
+	@State private var primaryColor2: Color = .clear
+	
 	var body: some View {
 		let opponentFirst = match.opponents.first?.opponent
 		let opponentSecond = match.opponents.last?.opponent
 		HStack {
 			OpponentView(
 				opponentName: opponentFirst?.name ?? "",
-				logoURL: opponentFirst?.imageURL
+				logoURL: opponentFirst?.imageURL,
+				primaryColor: $primaryColor1
 			)
 			Spacer()
 			CentralInfoView(
@@ -372,26 +419,46 @@ struct MatchView : View {
 			Spacer()
 			OpponentView(
 				opponentName: opponentSecond?.name ?? "",
-				logoURL: opponentSecond?.imageURL
+				logoURL: opponentSecond?.imageURL,
+				primaryColor: $primaryColor2
 			)
 		}
+		.padding()
+		.background(
+			RoundedRectangle(cornerRadius: 10)
+				.fill(LinearGradient(gradient: Gradient(
+					colors: [primaryColor1, primaryColor2]),
+									 startPoint: .bottomLeading,
+									 endPoint: .bottomTrailing)))
 		.padding(.vertical, 10)
 	}
 }
 
-struct OpponentView : View {
+struct OpponentView: View {
 	@State var isTruncated: Bool = false
-	let opponentName : String
-	let logoURL : URL?
+	let opponentName: String
+	let logoURL: URL?
+	@Binding var primaryColor: Color
 	
 	var body: some View {
 		VStack {
-			AsyncImage(url: logoURL) { image in
-				image
-					.resizable()
-					.scaledToFit()
-					.frame(width: 50, height: 50, alignment: .center)
-			} placeholder: {
+			if let logoURL = logoURL {
+				AsyncImage(url: logoURL) { image in
+					image
+						.resizable()
+						.scaledToFit()
+						.frame(width: 50, height: 50, alignment: .center)
+						.onAppear {
+							let uiImage = image.asUIImage()
+							let adjustedColor = UIColor(Color(uiImage.getDominantColor())).adjustedForBrightness()
+							self.primaryColor = Color(adjustedColor)
+						}
+				} placeholder: {
+					Image(systemName: "gamecontroller.fill")
+						.foregroundStyle(Color(.systemBlue))
+						.frame(width: 50, height: 50)
+				}
+			} else {
 				Image(systemName: "gamecontroller.fill")
 					.foregroundStyle(Color(.systemBlue))
 					.frame(width: 50, height: 50)
@@ -407,6 +474,43 @@ struct OpponentView : View {
 		.fontWeight(.light)
 		.lineLimit(1)
 		.multilineTextAlignment(.center)
+		.onAppear {
+			loadPrimaryColors()
+		}
+	}
+	
+	func loadPrimaryColors() {
+		if let logoURL = logoURL {
+			DispatchQueue.global().async {
+				if let data = try? Data(contentsOf: logoURL),
+				   let image = UIImage(data: data) {
+					let color1 = image.getDominantColor()
+					let adjustedColor = UIColor(Color(color1)).adjustedForBrightness()
+					DispatchQueue.main.async {
+						self.primaryColor = Color(adjustedColor)
+					}
+				}
+			}
+		}
+	}
+}
+
+extension Image {
+	func asUIImage() -> UIImage {
+		let controller = UIHostingController(rootView: self.resizable())
+		let view = controller.view
+		
+		let targetSize = controller.view.intrinsicContentSize
+		view?.bounds = CGRect(origin: .zero, size: targetSize)
+		view?.backgroundColor = .clear
+		
+		let format = UIGraphicsImageRendererFormat()
+		format.scale = 1
+		let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+		
+		return renderer.image { _ in
+			view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+		}
 	}
 }
 
