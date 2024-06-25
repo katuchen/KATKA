@@ -234,6 +234,7 @@ enum WinnerType : String {
 }
 
 // MARK: Logo Color Extensions
+
 extension UIImage {
 	func getDominantColor() -> UIColor {
 		let defaultColor : UIColor = UIColor(red: 0, green: 0, blue: 100, alpha: 1)
@@ -263,7 +264,7 @@ extension UIColor {
 	
 	func adjustedForBrightness() -> UIColor {
 		let hsb = self.getHSBComponents()
-		let brightnessThreshold: CGFloat = 0.5
+		let brightnessThreshold: CGFloat = 0.55
 		if hsb.brightness > brightnessThreshold {
 			return UIColor(hue: hsb.hue, saturation: hsb.saturation, brightness: brightnessThreshold, alpha: hsb.alpha)
 		}
@@ -275,6 +276,11 @@ extension UIColor {
 
 class DataViewModel : ObservableObject {
 	@Published var matches : [MatchModel] = []
+	@Published var dateSelected : Date = Date() {
+		didSet {
+			getMatches()
+		}
+	}
 	
 	var cancellables = Set<AnyCancellable>()
 	
@@ -289,7 +295,8 @@ class DataViewModel : ObservableObject {
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "sort", value: "-tier"),
-			URLQueryItem(name: "range[begin_at]", value: "2024-06-24T00:00:00Z,2024-06-24T23:59:59Z"),
+			URLQueryItem(name: "range[begin_at]",
+						 value: "\(getDatesForFilter(date: dateSelected))"),
 			URLQueryItem(name: "sort", value: "begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
@@ -323,6 +330,17 @@ class DataViewModel : ObservableObject {
 			})
 			.store(in: &cancellables)
 	}
+	func getDatesForFilter(date : Date) -> String {
+		let formatter = DateFormatter()
+		//formatter.timeZone = .gmt
+		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+		let startOfDay = Calendar.current.startOfDay(for: date)
+		let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)
+		var datesString = ""
+		datesString = formatter.string(from: startOfDay) + "Z," + formatter.string(from: endOfDay ?? startOfDay)
+		print(datesString)
+		return datesString
+	}
 }
 
 // MARK: Views
@@ -332,41 +350,80 @@ struct HomeScreen: View {
 	
 	var body: some View {
 		ZStack {
-			//RadialGradient(colors: [.blue, .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
-			ScrollView(content: {
-				LazyVStack (spacing: 20) {
-					ForEach(vm.matches) { match in
-						let league = match.league
-						let tournament = match.tournament
-						let series = match.serie
-						LazyVStack (spacing: 0) {
-							HStack {
-								LeagueView(
-									logoURL: league?.imageURL,
-									leagueName: league?.name ?? "",
-									tournamentName: tournament?.name ?? "",
-									seriesName: series?.name ?? ""
-								)
+			RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+			VStack {
+				TimeLine(dateSelected: $vm.dateSelected)
+				ScrollViewReader { proxy in
+					ScrollView {
+						LazyVStack(spacing: 10) {
+							ForEach(vm.matches) { match in
+								LazyVStack(spacing: 0) {
+									MatchView(match: match)
+								}
+								.padding(.horizontal, 20)
 							}
-							MatchView(match: match)
 						}
-						.padding(.horizontal, 20)
 					}
 				}
-				//.background(.background)
 			}
-			)
 		}
 	}
 }
 
-struct LeagueView : View {
-	let logoURL : URL?
-	let leagueName : String
-	let tournamentName : String
-	let seriesName : String
+struct TimeLine: View {
+	@Binding var dateSelected: Date
 	
 	var body: some View {
+		HStack (spacing: 20) {
+			TimeLineButton(label: "Yesterday", isChosen: dateSelected.isSameDay(as: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()))
+				.onTapGesture {
+					dateSelected = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+				}
+			TimeLineButton(label: "Today", isChosen: dateSelected.isSameDay(as: Date()))
+				.onTapGesture {
+					dateSelected = Date()
+				}
+			TimeLineButton(label: "Tomorrow", isChosen: dateSelected.isSameDay(as: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()))
+				.onTapGesture {
+					dateSelected = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+				}
+		}
+	}
+}
+
+extension Date {
+	func isSameDay(as otherDate: Date) -> Bool {
+		let calendar = Calendar.current
+		return calendar.isDate(self, inSameDayAs: otherDate)
+	}
+}
+
+
+struct TimeLineButton: View {
+	let label: String
+	var isChosen: Bool
+	
+	var body: some View {
+		Text(label)
+			.foregroundColor(isChosen ? Color(.label) : Color(.secondaryLabel))
+			.padding(.vertical, 10)
+			.padding(.horizontal, 10)
+			.background(
+				RoundedRectangle(cornerRadius: 10)
+					.fill(isChosen ? Color(.systemBlue) : Color(.secondarySystemFill))
+			)
+	}
+}
+
+
+struct LeagueView : View {
+	let match : MatchModel
+	
+	var body: some View {
+		let leagueName = match.league?.name
+		let tournamentName = match.tournament?.name
+		let seriesName = match.serie?.name
+		let logoURL = match.league?.imageURL
 		//		AsyncImage(url: logoURL) { image in
 		//			image
 		//				.resizable()
@@ -379,11 +436,11 @@ struct LeagueView : View {
 		//		}
 		//		.frame(width: 20, height: 20)
 		VStack {
-			Text("\(leagueName)")
+			Text("\(leagueName ?? "")")
 				.font(.subheadline)
 				.foregroundStyle(Color(.label))
 				.bold()
-			Text("\(seriesName) \(tournamentName)")
+			Text("\(seriesName ?? "") \(tournamentName ?? "")")
 		}
 		.font(.caption)
 		.foregroundStyle(Color(.secondaryLabel))
@@ -523,20 +580,25 @@ struct CentralInfoView : View {
 	let results: [ResultsModel]
 	
 	var body: some View {
+		let matchRealDate = getRealDate(stringDate: matchDate)
+		
 		VStack {
+			if !Calendar.current.isDateInToday(matchRealDate) {
+				Text("\(getDate(from: matchRealDate))")
+					.font(.subheadline)
+					.foregroundStyle(Color(.secondaryLabel))
+			}
+			
 			if status == "finished" {
 				let resultFirst = results.first?.score
 				let resultSecond = results.last?.score
 				Text("\(resultFirst ?? 000) - \(resultSecond ?? 000)")
 					.font(.title)
 			} else {
-				let matchRealDate = getRealDate(stringDate: matchDate)
-				Text("\(getDate(from: matchRealDate))")
-					.font(.subheadline)
-					.foregroundStyle(Color(.secondaryLabel))
 				Text("\(getTime(from: matchRealDate))")
 					.font(.title)
 			}
+			
 			Text("\(matchType == "best_of" ? "BO" : "")\(numberOfGames)")
 				.font(.subheadline)
 				.foregroundStyle(Color(.secondaryLabel))
