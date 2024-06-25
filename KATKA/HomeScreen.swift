@@ -96,12 +96,17 @@ struct SeriesModel : Identifiable, Codable {
 
 struct VideogameModel : Identifiable, Codable {
 	let id: Int
-	let name, slug: String?
+	let name : String?
+	let slug: String?
+	let leagues : [LeagueModel]?
+	let url: URL?
 	
 	enum CodingKeys: String, CodingKey {
 		case id
 		case name
 		case slug
+		case leagues
+		case url
 	}
 }
 
@@ -264,10 +269,11 @@ extension UIColor {
 	
 	func adjustedForBrightness() -> UIColor {
 		let hsb = self.getHSBComponents()
-		let brightnessThreshold: CGFloat = 0.55
-		if hsb.brightness > brightnessThreshold {
+		let brightnessThreshold: CGFloat = 0.6
+		if hsb.brightness > brightnessThreshold || hsb.brightness < 0.4 {
 			return UIColor(hue: hsb.hue, saturation: hsb.saturation, brightness: brightnessThreshold, alpha: hsb.alpha)
 		}
+		
 		return self
 	}
 }
@@ -294,6 +300,7 @@ class DataViewModel : ObservableObject {
 		}
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
+			//URLQueryItem(name: "filter[videogame]", value: "cs-go"),
 			URLQueryItem(name: "sort", value: "-tier"),
 			URLQueryItem(name: "range[begin_at]",
 						 value: "\(getDatesForFilter(date: dateSelected))"),
@@ -352,21 +359,35 @@ struct HomeScreen: View {
 		ZStack {
 			RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
 			VStack {
+				GameFilterView()
 				TimeLine(dateSelected: $vm.dateSelected)
-				ScrollViewReader { proxy in
-					ScrollView {
-						LazyVStack(spacing: 10) {
-							ForEach(vm.matches) { match in
-								LazyVStack(spacing: 0) {
-									MatchView(match: match)
-								}
-								.padding(.horizontal, 20)
+				ScrollView {
+					LazyVStack(spacing: 10) {
+						ForEach(vm.matches) { match in
+							LazyVStack(spacing: 0) {
+								MatchView(match: match)
 							}
+							.padding(.horizontal, 20)
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+struct GameFilterView : View {
+	var body: some View {
+		Menu("Games") {
+			Button("Example", action: {})
+		}
+		.padding(.vertical, 5)
+		.padding(.horizontal, 10)
+		.foregroundStyle(.white)
+		.background(
+		RoundedRectangle(cornerRadius: 50)
+			.fill(Color(.systemGray3))
+		)
 	}
 }
 
@@ -377,17 +398,34 @@ struct TimeLine: View {
 		HStack (spacing: 20) {
 			TimeLineButton(label: "Yesterday", isChosen: dateSelected.isSameDay(as: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()))
 				.onTapGesture {
-					dateSelected = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+					withAnimation(.smooth) {
+						dateSelected = changeSelectedDate(to: -1)
+					}
 				}
 			TimeLineButton(label: "Today", isChosen: dateSelected.isSameDay(as: Date()))
 				.onTapGesture {
-					dateSelected = Date()
+					withAnimation(.smooth) {
+						dateSelected = Date()
+					}
 				}
 			TimeLineButton(label: "Tomorrow", isChosen: dateSelected.isSameDay(as: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()))
 				.onTapGesture {
-					dateSelected = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+					withAnimation(.smooth) {
+						dateSelected = changeSelectedDate(to: 1)
+						
+					}
 				}
 		}
+	}
+}
+
+//MARK: TimeLine Helper functions
+
+
+
+extension TimeLine {
+	func changeSelectedDate(to numberOfDays: Int) -> Date {
+		return Calendar.current.date(byAdding: .day, value: numberOfDays, to: Date()) ?? Date()
 	}
 }
 
@@ -398,7 +436,6 @@ extension Date {
 	}
 }
 
-
 struct TimeLineButton: View {
 	let label: String
 	var isChosen: Bool
@@ -406,6 +443,7 @@ struct TimeLineButton: View {
 	var body: some View {
 		Text(label)
 			.foregroundColor(isChosen ? Color(.label) : Color(.secondaryLabel))
+			.bold()
 			.padding(.vertical, 10)
 			.padding(.horizontal, 10)
 			.background(
@@ -415,7 +453,6 @@ struct TimeLineButton: View {
 	}
 }
 
-
 struct LeagueView : View {
 	let match : MatchModel
 	
@@ -424,17 +461,18 @@ struct LeagueView : View {
 		let tournamentName = match.tournament?.name
 		let seriesName = match.serie?.name
 		let logoURL = match.league?.imageURL
-		//		AsyncImage(url: logoURL) { image in
-		//			image
-		//				.resizable()
-		//				.scaledToFit()
-		//				.frame(width: 20, height: 20)
-		//		} placeholder: {
-		//			Image(systemName: "circle.fill")
-		//				.foregroundStyle(Color(.systemBlue))
-		//				.frame(width: 20, height: 20)
-		//		}
-		//		.frame(width: 20, height: 20)
+		
+		//			AsyncImage(url: logoURL) { image in
+		//				image
+		//					.resizable()
+		//					.scaledToFit()
+		//					.frame(width: 20, height: 20)
+		//			} placeholder: {
+		//				Image(systemName: "circle.fill")
+		//					.foregroundStyle(Color(.systemBlue))
+		//					.frame(width: 20, height: 20)
+		//			}
+		//			.frame(width: 20, height: 20)
 		VStack {
 			Text("\(leagueName ?? "")")
 				.font(.subheadline)
@@ -452,6 +490,7 @@ struct LeagueView : View {
 
 struct MatchView : View {
 	let match : MatchModel
+	
 	@State private var primaryColor1: Color = .clear
 	@State private var primaryColor2: Color = .clear
 	
@@ -511,8 +550,7 @@ struct OpponentView: View {
 							self.primaryColor = Color(adjustedColor)
 						}
 				} placeholder: {
-					Image(systemName: "gamecontroller.fill")
-						.foregroundStyle(Color(.systemBlue))
+					ProgressView()
 						.frame(width: 50, height: 50)
 				}
 			} else {
@@ -549,6 +587,10 @@ struct OpponentView: View {
 				}
 			}
 		}
+		
+		else {
+			self.primaryColor = Color(.blue.opacity(0.3))
+		}
 	}
 }
 
@@ -583,6 +625,7 @@ struct CentralInfoView : View {
 		let matchRealDate = getRealDate(stringDate: matchDate)
 		
 		VStack {
+			
 			if !Calendar.current.isDateInToday(matchRealDate) {
 				Text("\(getDate(from: matchRealDate))")
 					.font(.subheadline)
