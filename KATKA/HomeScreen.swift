@@ -94,17 +94,62 @@ struct SeriesModel : Identifiable, Codable {
 	}
 }
 
-struct VideogameModel : Identifiable, Codable {
-	let id: Int
-	let name : String?
-	let slug: String?
+struct VideogameModel : Codable {
+	enum id : Int, CaseIterable {
+		case cs = 3
+		case dota = 4
+		case leagueOfLegends = 1
+		case valorant = 26
+		case codMW = 23
+		case fifa = 25
+		case kog = 27
+		case lolWildRift = 28
+		case mlbb = 34
+		case overwatch = 14
+		case pubg = 20
+		case r6Siege = 24
+		case rocketLeague = 22
+		case starcraft2 = 29
+		case starcraftBW = 30
+	}
+	enum name : String, CaseIterable {
+		case cs = "Counter-Strike"
+		case dota = "Dota 2"
+		case leagueOfLegends = "LoL"
+		case valorant = "Valorant"
+		case codMW = "Call of Duty"
+		case fifa = "EA Sports FC 24"
+		case kog = "King of Glory"
+		case lolWildRift = "LoL Wild Rift"
+		case mlbb = "Mobile Legends: Bang Bang"
+		case overwatch = "Overwatch"
+		case pubg = "PUBG"
+		case r6Siege = "Rainbow 6 Siege"
+		case rocketLeague = "Rocket League"
+		case starcraft2 = "StarCraft 2"
+		case starcraftBW = "StarCraft Brood War"
+	}
+	enum slug: String, CaseIterable {
+		case cs = "cs-go"
+		case dota = "dota-2"
+		case leagueOfLegends = "league-of-legends"
+		case valorant = "valorant"
+		case codMW = "cod-mw"
+		case fifa = "fifa"
+		case kog = "kog"
+		case lolWildRift = "lol-wild-rift"
+		case mlbb = "mlbb"
+		case overwatch = "ow"
+		case pubg = "pubg"
+		case r6Siege = "r6-siege"
+		case rocketLeague = "rl"
+		case starcraft2 = "starcraft-2"
+		case starcraftBW = "starcraft-brood-war"
+	}
 	let leagues : [LeagueModel]?
 	let url: URL?
 	
 	enum CodingKeys: String, CodingKey {
-		case id
-		case name
-		case slug
 		case leagues
 		case url
 	}
@@ -288,11 +333,20 @@ class DataViewModel : ObservableObject {
 		}
 	}
 	
+	static let allGames = VideogameModel.slug.allCases.map{ $0.rawValue }.joined(separator: ",")
+	
+	@Published var gameSelected : String = allGames {
+		didSet {
+			getMatches()
+		}
+	}
+	
 	var cancellables = Set<AnyCancellable>()
 	
 	init() {
 		getMatches()
 	}
+	
 	func getMatches() {
 		guard let url = URL(string: "https://api.pandascore.co/matches") else {
 			print("URL ERROR")
@@ -300,10 +354,9 @@ class DataViewModel : ObservableObject {
 		}
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
-			//URLQueryItem(name: "filter[videogame]", value: "cs-go"),
+			URLQueryItem(name: "filter[videogame]", value: gameSelected),
 			URLQueryItem(name: "sort", value: "-tier"),
-			URLQueryItem(name: "range[begin_at]",
-						 value: "\(getDatesForFilter(date: dateSelected))"),
+			URLQueryItem(name: "range[begin_at]", value: "\(getDatesForFilter(date: dateSelected))"),
 			URLQueryItem(name: "sort", value: "begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
@@ -337,15 +390,18 @@ class DataViewModel : ObservableObject {
 			})
 			.store(in: &cancellables)
 	}
+	
 	func getDatesForFilter(date : Date) -> String {
 		let formatter = DateFormatter()
-		//formatter.timeZone = .gmt
+		formatter.timeZone = .gmt
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+		
 		let startOfDay = Calendar.current.startOfDay(for: date)
 		let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)
 		var datesString = ""
+		
 		datesString = formatter.string(from: startOfDay) + "Z," + formatter.string(from: endOfDay ?? startOfDay)
-		print(datesString)
+		print("For dates: \(datesString)")
 		return datesString
 	}
 }
@@ -357,17 +413,15 @@ struct HomeScreen: View {
 	
 	var body: some View {
 		ZStack {
-			RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+			background
 			VStack {
-				GameFilterView()
+				GameSelected(gameSelected: $vm.gameSelected)
 				TimeLine(dateSelected: $vm.dateSelected)
 				ScrollView {
-					LazyVStack(spacing: 10) {
+					LazyVStack(spacing: 0) {
 						ForEach(vm.matches) { match in
-							LazyVStack(spacing: 0) {
-								MatchView(match: match)
-							}
-							.padding(.horizontal, 20)
+							MatchView(match: match)
+								.padding(.horizontal, 20)
 						}
 					}
 				}
@@ -376,18 +430,60 @@ struct HomeScreen: View {
 	}
 }
 
-struct GameFilterView : View {
+extension HomeScreen {
+	var background : some View {
+		return RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+	}
+}
+
+struct GameSelected : View {
+	@Binding var gameSelected : String
+	let slugToName: [VideogameModel.slug: VideogameModel.name] = [
+		.cs: .cs,
+		.dota: .dota,
+		.leagueOfLegends: .leagueOfLegends,
+		.valorant: .valorant,
+		.codMW: .codMW,
+		.fifa: .fifa,
+		.kog: .kog,
+		.lolWildRift: .lolWildRift,
+		.mlbb: .mlbb,
+		.overwatch: .overwatch,
+		.pubg: .pubg,
+		.r6Siege: .r6Siege,
+		.rocketLeague: .rocketLeague,
+		.starcraft2: .starcraft2,
+		.starcraftBW: .starcraftBW
+	]
+	
 	var body: some View {
-		Menu("Games") {
-			Button("Example", action: {})
+		HStack {
+			Menu {
+				Button("All games") {
+					gameSelected = DataViewModel.allGames
+				}
+				ForEach(VideogameModel.slug.allCases, id: \.self) { slug in
+					if let name = slugToName[slug] {
+						Button(name.rawValue) {
+							gameSelected = slug.rawValue
+						}
+					}
+				}
+			} label: {
+				Text(slugToName.first(where: { $0.key.rawValue == gameSelected })?.value.rawValue ?? "All games")
+					.font(.headline)
+					.foregroundStyle(.white)
+					.padding(.vertical, 5)
+					.padding(.horizontal, 15)
+					.background(
+						RoundedRectangle(cornerRadius: 50)
+							.fill(gameSelected != DataViewModel.allGames ? Color(.systemBlue) : Color(.secondarySystemFill))
+					)
+			}
+			
 		}
-		.padding(.vertical, 5)
-		.padding(.horizontal, 10)
-		.foregroundStyle(.white)
-		.background(
-		RoundedRectangle(cornerRadius: 50)
-			.fill(Color(.systemGray3))
-		)
+		.padding(.horizontal, 40)
+		.frame(maxWidth: .infinity, alignment: .trailing)
 	}
 }
 
@@ -420,8 +516,6 @@ struct TimeLine: View {
 }
 
 //MARK: TimeLine Helper functions
-
-
 
 extension TimeLine {
 	func changeSelectedDate(to numberOfDays: Int) -> Date {
@@ -462,17 +556,17 @@ struct LeagueView : View {
 		let seriesName = match.serie?.name
 		let logoURL = match.league?.imageURL
 		
-		//			AsyncImage(url: logoURL) { image in
-		//				image
-		//					.resizable()
-		//					.scaledToFit()
-		//					.frame(width: 20, height: 20)
-		//			} placeholder: {
-		//				Image(systemName: "circle.fill")
-		//					.foregroundStyle(Color(.systemBlue))
-		//					.frame(width: 20, height: 20)
-		//			}
-		//			.frame(width: 20, height: 20)
+		AsyncImage(url: logoURL) { image in
+			image
+				.resizable()
+				.scaledToFit()
+				.frame(width: 20, height: 20)
+		} placeholder: {
+			Image(systemName: "circle.fill")
+				.foregroundStyle(Color(.systemBlue))
+				.frame(width: 20, height: 20)
+		}
+		.frame(width: 20, height: 20)
 		VStack {
 			Text("\(leagueName ?? "")")
 				.font(.subheadline)
@@ -497,9 +591,10 @@ struct MatchView : View {
 	var body: some View {
 		let opponentFirst = match.opponents.first?.opponent
 		let opponentSecond = match.opponents.last?.opponent
+		
 		HStack {
 			OpponentView(
-				opponentName: opponentFirst?.name ?? "",
+				opponentName: opponentFirst?.name ?? "TBD",
 				logoURL: opponentFirst?.imageURL,
 				primaryColor: $primaryColor1
 			)
@@ -514,7 +609,7 @@ struct MatchView : View {
 			)
 			Spacer()
 			OpponentView(
-				opponentName: opponentSecond?.name ?? "",
+				opponentName: opponentSecond?.name ?? "TBD",
 				logoURL: opponentSecond?.imageURL,
 				primaryColor: $primaryColor2
 			)
