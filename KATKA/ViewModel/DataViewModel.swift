@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 import Combine
 
-class DataViewModel : ObservableObject {
+class DataViewModel: ObservableObject {
 	@Published var matches : [MatchModel] = []
 	@Published var dateSelected : Date = Date() {
 		didSet {
@@ -40,12 +40,17 @@ class DataViewModel : ObservableObject {
 		]
 		components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
 		
+		guard let token = ProcessInfo.processInfo.environment["TOKEN"] else {
+			print("TOKEN ERROR")
+			return
+		}
+		
 		var request = URLRequest(url: components.url ?? url)
 		request.httpMethod = "GET"
 		request.timeoutInterval = 10
 		request.allHTTPHeaderFields = [
 			"accept": "application/json",
-			"authorization": "Bearer \(ProcessInfo.processInfo.environment["token"] ?? "")"
+			"authorization": "Bearer \(token)"
 		]
 		
 		URLSession.shared.dataTaskPublisher(for: request)

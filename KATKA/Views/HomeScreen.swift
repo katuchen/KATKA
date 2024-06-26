@@ -1,11 +1,5 @@
 import SwiftUI
-import Foundation
-import Combine
-import CoreImage
-import CoreImage.CIFilterBuiltins
 import UIKit
-
-// MARK: Views
 
 struct HomeScreen: View {
 	@StateObject var vm = DataViewModel()
@@ -24,6 +18,7 @@ struct HomeScreen: View {
 						}
 					}
 				}
+				.scrollIndicators(.hidden)
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TeamModel : Identifiable, Codable {
+struct TeamModel: Identifiable, Codable {
 	let id: Int
 	let name: String?
 	let acronym: String?
