@@ -45,7 +45,7 @@ class DataViewModel : ObservableObject {
 		request.timeoutInterval = 10
 		request.allHTTPHeaderFields = [
 			"accept": "application/json",
-			"authorization": "Bearer KpufEefVottDMcR4pDhBsIN-OVUAUyDx2FfII2wRkAizE9K_He8"
+			"authorization": "Bearer \(ProcessInfo.processInfo.environment["token"] ?? "")"
 		]
 		
 		URLSession.shared.dataTaskPublisher(for: request)
