@@ -17,12 +17,6 @@ struct CentralInfoView : View {
 				.bold()
 				.foregroundStyle(Color(.secondaryLabel))
 				.lineLimit(1)
-			
-			if !Calendar.current.isDateInToday(matchRealDate) {
-				Text("\(getDate(from: matchRealDate))")
-					.font(.subheadline)
-					.foregroundStyle(Color(.secondaryLabel))
-			}
 			if status == "finished" {
 				let resultFirst = results.first?.score
 				let resultSecond = results.last?.score
