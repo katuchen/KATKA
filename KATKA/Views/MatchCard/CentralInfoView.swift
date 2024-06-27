@@ -12,23 +12,33 @@ struct CentralInfoView : View {
 		let matchRealDate = getRealDate(stringDate: matchDate)
 		
 		VStack {
+			Text(league)
+				.font(.footnote)
+				.bold()
+				.foregroundStyle(Color(.secondaryLabel))
+				.lineLimit(1)
 			
 			if !Calendar.current.isDateInToday(matchRealDate) {
 				Text("\(getDate(from: matchRealDate))")
 					.font(.subheadline)
 					.foregroundStyle(Color(.secondaryLabel))
 			}
-			
 			if status == "finished" {
 				let resultFirst = results.first?.score
 				let resultSecond = results.last?.score
 				Text("\(resultFirst ?? 000) - \(resultSecond ?? 000)")
 					.font(.title)
+					.bold()
+			} else if status == "running" {
+				HStack (spacing: 5) {
+					Text("LIVE")
+						.font(.title2)
+				}
 			} else {
 				Text("\(getTime(from: matchRealDate))")
 					.font(.title)
+					.bold()
 			}
-			
 			Text("\(matchType == "best_of" ? "BO" : "")\(numberOfGames)")
 				.font(.subheadline)
 				.foregroundStyle(Color(.secondaryLabel))
@@ -54,5 +64,12 @@ extension CentralInfoView {
 	func getTime(from date: Date, formatter : DateFormatter = DateFormatter()) -> String {
 		formatter.dateFormat = "HH:mm"
 		return formatter.string(from: date)
+	}
+}
+extension Color {
+	static let ui = Color.UI()
+	
+	struct UI {
+		let electricGreen = Color("ElectricGreen")
 	}
 }

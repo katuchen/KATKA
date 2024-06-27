@@ -1,10 +1,3 @@
-//
-//  Persistence.swift
-//  KATKA
-//
-//  Created by Екатерина Кузмичева on 21.06.2024.
-//
-
 import CoreData
 
 struct PersistenceController {

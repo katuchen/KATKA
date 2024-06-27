@@ -33,7 +33,7 @@ struct OpponentView: View {
 				.fontWeight(.light)
 				.foregroundStyle(Color(.label))
 				.padding(.horizontal, 10)
-				.frame(maxWidth: 200)
+				.frame(maxWidth: .infinity)
 		}
 		.font(.title3)
 		.fontWeight(.light)

@@ -6,7 +6,7 @@ struct HomeScreen: View {
 	
 	var body: some View {
 		ZStack {
-			background
+			backGround
 			VStack {
 				GameFilterView(gameSelected: $vm.gameSelected)
 				TimeLineView(dateSelected: $vm.dateSelected)
@@ -25,7 +25,7 @@ struct HomeScreen: View {
 }
 
 extension HomeScreen {
-	var background : some View {
+	var backGround : some View {
 		return RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
 	}
 }
