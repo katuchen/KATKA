@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MatchView : View {
+struct MatchesView : View {
 	let match : MatchModel
 	
 	@State private var primaryColor1: Color = .clear
@@ -27,8 +27,8 @@ struct MatchView : View {
 			)
 			Spacer()
 			OpponentView(
-				opponentName: opponentSecond?.name ?? "TBD",
-				logoURL: opponentSecond?.imageURL,
+				opponentName: (opponentSecond?.name == opponentFirst?.name ? "TBD" : opponentSecond?.name) ?? "TBD",
+				logoURL: (opponentSecond?.imageURL == opponentFirst?.imageURL ? URL(string: "") : opponentSecond?.imageURL),
 				primaryColor: $primaryColor2
 			)
 		}

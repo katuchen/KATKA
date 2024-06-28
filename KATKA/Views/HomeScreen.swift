@@ -18,6 +18,10 @@ struct HomeScreen: View {
 				.tabItem {
 					Label("Following", systemImage: "star")
 				}
+			ProfileView()
+				.tabItem {
+					Label("Profile", image: "person.crop.circle")
+				}
 		}
 	}
 	
@@ -68,7 +72,7 @@ extension HomeScreen {
 	var showMatches: some View {
 		LazyVStack(spacing: 0) {
 			ForEach(vm.matches) { match in
-				MatchView(match: match)
+				MatchesView(match: match)
 					.padding(.horizontal, 20)
 					.id(match.id)
 			}
