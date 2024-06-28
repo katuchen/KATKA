@@ -1,6 +1,9 @@
 import SwiftUI
 
-struct MatchModel : Identifiable, Codable {
+struct MatchModel : Identifiable, Codable, Equatable {
+	static func == (lhs: MatchModel, rhs: MatchModel) -> Bool {
+		return lhs.id == rhs.id
+	}
 	let beginAt, endAt: String?
 	let detailedStats, draw: Bool?
 	let forfeit: Bool?

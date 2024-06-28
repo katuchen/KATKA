@@ -30,6 +30,8 @@
 		0BA7D9922C2C776600996C54 /* OpponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9912C2C776600996C54 /* OpponentView.swift */; };
 		0BA7D9942C2C77ED00996C54 /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9932C2C77ED00996C54 /* ColorExtension.swift */; };
 		0BA7D9982C2C790400996C54 /* CentralInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9972C2C790400996C54 /* CentralInfoView.swift */; };
+		0BF2BEAE2C2DAF4400177387 /* LeaguesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */; };
+		0BF2BEB22C2DB40A00177387 /* FavouritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +59,8 @@
 		0BA7D9912C2C776600996C54 /* OpponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpponentView.swift; sourceTree = "<group>"; };
 		0BA7D9932C2C77ED00996C54 /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		0BA7D9972C2C790400996C54 /* CentralInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CentralInfoView.swift; sourceTree = "<group>"; };
+		0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaguesListView.swift; sourceTree = "<group>"; };
+		0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +143,8 @@
 			children = (
 				0BE571852C2C7A0800DC9C30 /* HeaderMenu */,
 				0B46355E2C25B5E900890BCC /* HomeScreen.swift */,
+				0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */,
+				0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */,
 				0BA7D9962C2C78B100996C54 /* MatchCard */,
 			);
 			path = Views;
@@ -257,6 +263,8 @@
 				0BA7D9722C2C4F4E00996C54 /* SeriesModel.swift in Sources */,
 				0B4635552C25B59900890BCC /* Persistence.swift in Sources */,
 				0BA7D9892C2C760300996C54 /* GameFilterView.swift in Sources */,
+				0BF2BEAE2C2DAF4400177387 /* LeaguesListView.swift in Sources */,
+				0BF2BEB22C2DB40A00177387 /* FavouritesView.swift in Sources */,
 				0BA7D97E2C2C738300996C54 /* ResultModel.swift in Sources */,
 				0B4635582C25B59900890BCC /* KATKA.xcdatamodeld in Sources */,
 				0B46354C2C25B59800890BCC /* KATKAApp.swift in Sources */,
