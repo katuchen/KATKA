@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct HomeScreen: View {
-	@StateObject var vm = DataViewModel()
+	@StateObject var vm = MatchViewModel()
 	
+	// Нижнее TabMenu со вкладками
 	var body: some View {
 		TabView {
 			matchesList
@@ -20,6 +21,7 @@ struct HomeScreen: View {
 		}
 	}
 	
+	// Основной контент HomeScreen
 	var matchesList: some View {
 		ZStack {
 			backGround
@@ -28,16 +30,17 @@ struct HomeScreen: View {
 				TimeLineView(dateSelected: $vm.dateSelected)
 				ScrollViewReader { proxy in
 					ScrollView {
-						LazyVStack(spacing: 0) {
-							withAnimation(.smooth) {
-								ForEach(vm.matches) { match in
-									MatchView(match: match)
-										.padding(.horizontal, 20)
-										.id(match.id)
-								}
+						if vm.isLoading {
+							DataLoadingProgressView()
+						} else {
+							if vm.matches.isEmpty {
+								NoMatchesView()
+							} else {
+								showMatches
 							}
 						}
 					}
+					// Возврат ScrollView вверх при обновлении матчей
 					.scrollIndicators(.automatic)
 					.onChange(of: vm.matches) { _,_ in
 						withAnimation (.easeOut) {
@@ -54,9 +57,26 @@ struct HomeScreen: View {
 
 extension HomeScreen {
 	var backGround : some View {
-		return RadialGradient(colors: [.blue.opacity(0.8), .black], center: .top, startRadius: 1, endRadius: 400).ignoresSafeArea()
+		return RadialGradient(
+			colors: [.blue.opacity(0.8), .black],
+			center: .top,
+			startRadius: 1,
+			endRadius: 400
+		)
+		.ignoresSafeArea()
+	}
+	var showMatches: some View {
+		LazyVStack(spacing: 0) {
+			ForEach(vm.matches) { match in
+				MatchView(match: match)
+					.padding(.horizontal, 20)
+					.id(match.id)
+			}
+		}
 	}
 }
+
+
 
 #Preview {
 	HomeScreen()

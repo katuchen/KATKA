@@ -1,19 +1,20 @@
 import SwiftUI
 
 struct LeaguesListView: View {
+	let leagues = ["TI", "ESL", "BLAST", "A", "B", "C", "D"]
 	var body: some View {
 		NavigationStack {
-		ZStack {
-			backGround
-			VStack {
-				List {
-					
+			ZStack {
+				backGround
+				List(leagues, id: \.self) { league in
+					NavigationLink(league, value: league)
 				}
+				.listStyle(.grouped)
+				.scrollContentBackground(.hidden)
 			}
-			}
-		.navigationTitle("Leagues")
+			.navigationTitle("Leagues")
 		}
-    }
+	}
 }
 
 extension LeaguesListView {

@@ -24,7 +24,7 @@ struct GameFilterView : View {
 		HStack {
 			Menu {
 				Button("All games") {
-					gameSelected = DataViewModel.allGames
+					gameSelected = MatchViewModel.allGames
 				}
 				ForEach(VideogameModel.slug.allCases, id: \.self) { slug in
 					if let name = slugToName[slug] {
@@ -41,7 +41,7 @@ struct GameFilterView : View {
 					.padding(.horizontal, 15)
 					.background(
 						RoundedRectangle(cornerRadius: 50)
-							.fill(gameSelected != DataViewModel.allGames ? Color(.systemBlue) : Color(.secondarySystemFill))
+							.fill(gameSelected != MatchViewModel.allGames ? Color(.systemBlue) : Color(.secondarySystemFill))
 					)
 			}
 			

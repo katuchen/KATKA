@@ -2,8 +2,9 @@ import SwiftUI
 import Foundation
 import Combine
 
-class DataViewModel: ObservableObject {
+class MatchViewModel: ObservableObject {
 	@Published var matches : [MatchModel] = []
+	@Published var isLoading = false
 	@Published var dateSelected : Date = Date() {
 		didSet {
 			getMatches()
@@ -25,6 +26,7 @@ class DataViewModel: ObservableObject {
 	}
 	
 	func getMatches() {
+		isLoading = true
 		guard let url = URL(string: "https://api.pandascore.co/matches") else {
 			print("URL ERROR")
 			return
@@ -69,6 +71,7 @@ class DataViewModel: ObservableObject {
 				}
 			}, receiveValue: { [weak self] returnedData in
 				self?.matches = returnedData
+				self?.isLoading = false
 			})
 			.store(in: &cancellables)
 	}
