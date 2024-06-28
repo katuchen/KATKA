@@ -27,6 +27,7 @@ struct CentralInfoView : View {
 				HStack (spacing: 5) {
 					Text("LIVE")
 						.font(.title2)
+						.bold()
 				}
 			} else {
 				Text("\(getTime(from: matchRealDate))")

@@ -34,9 +34,8 @@ class MatchViewModel: ObservableObject {
 		var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
 		let queryItems: [URLQueryItem] = [
 			URLQueryItem(name: "filter[videogame]", value: gameSelected),
-			URLQueryItem(name: "sort", value: "-tier"),
 			URLQueryItem(name: "range[begin_at]", value: "\(getDatesForFilter(date: dateSelected))"),
-			URLQueryItem(name: "sort", value: "begin_at"),
+			URLQueryItem(name: "sort", value: "-status,begin_at"),
 			URLQueryItem(name: "page", value: "1"),
 			URLQueryItem(name: "per_page", value: "50"),
 		]

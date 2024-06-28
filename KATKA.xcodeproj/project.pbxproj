@@ -117,6 +117,16 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		0B5407C02C2ED824000A468F /* HomeScreenElement */ = {
+			isa = PBXGroup;
+			children = (
+				0BE571852C2C7A0800DC9C30 /* HeaderMenu */,
+				0B5407BE2C2ED54D000A468F /* DataLoadingProgressView.swift */,
+				0B5407BC2C2ED2D3000A468F /* NoMatchesView.swift */,
+			);
+			path = HomeScreenElement;
+			sourceTree = "<group>";
+		};
 		0BA7D96C2C2C4E4100996C54 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -146,12 +156,10 @@
 			isa = PBXGroup;
 			children = (
 				0B46355E2C25B5E900890BCC /* HomeScreen.swift */,
-				0B5407BE2C2ED54D000A468F /* DataLoadingProgressView.swift */,
-				0B5407BC2C2ED2D3000A468F /* NoMatchesView.swift */,
-				0BE571852C2C7A0800DC9C30 /* HeaderMenu */,
 				0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */,
 				0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */,
 				0BA7D9962C2C78B100996C54 /* MatchCard */,
+				0B5407C02C2ED824000A468F /* HomeScreenElement */,
 			);
 			path = Views;
 			sourceTree = "<group>";
