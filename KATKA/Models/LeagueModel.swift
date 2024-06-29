@@ -5,7 +5,7 @@ struct LeagueModel : Identifiable, Codable {
 	let imageURL: URL?
 	let name: String?
 	let slug: String?
-	let url: URL?
+	let url: String?
 	
 	enum CodingKeys: String, CodingKey {
 		case id

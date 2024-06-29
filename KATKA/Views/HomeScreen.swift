@@ -10,7 +10,7 @@ struct HomeScreen: View {
 				.tabItem {
 					Label("Matches", systemImage: "gamecontroller.fill")
 				}
-			LeaguesListView()
+			LeaguesListView(matches: vm.matches)
 				.tabItem {
 					Label("Leagues", systemImage: "chart.bar.doc.horizontal")
 				}
@@ -30,7 +30,12 @@ struct HomeScreen: View {
 		ZStack {
 			backGround
 			VStack {
-				GameFilterView(gameSelected: $vm.gameSelected)
+				HStack {
+					CalendarView(dateChosen: $vm.dateSelected)
+					GameFilterView(gameSelected: $vm.gameSelected)
+				}
+				.frame(maxWidth: .infinity, alignment: .trailing)
+				.padding(.horizontal, 40)
 				TimeLineView(dateSelected: $vm.dateSelected)
 				ScrollViewReader { proxy in
 					ScrollView {
@@ -54,10 +59,12 @@ struct HomeScreen: View {
 						}
 					}
 				}
+				
 			}
 		}
 	}
 }
+
 
 extension HomeScreen {
 	var backGround : some View {
@@ -80,8 +87,7 @@ extension HomeScreen {
 	}
 }
 
-
-
 #Preview {
 	HomeScreen()
 }
+

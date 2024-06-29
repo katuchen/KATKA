@@ -33,6 +33,7 @@
 		0BA7D9922C2C776600996C54 /* OpponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9912C2C776600996C54 /* OpponentView.swift */; };
 		0BA7D9942C2C77ED00996C54 /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9932C2C77ED00996C54 /* ColorExtension.swift */; };
 		0BA7D9982C2C790400996C54 /* CentralInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA7D9972C2C790400996C54 /* CentralInfoView.swift */; };
+		0BB3BD4C2C309DBE00D6DFC0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB3BD4B2C309DBE00D6DFC0 /* CalendarView.swift */; };
 		0BF2BEAE2C2DAF4400177387 /* LeaguesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */; };
 		0BF2BEB22C2DB40A00177387 /* FavouritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */; };
 /* End PBXBuildFile section */
@@ -65,6 +66,7 @@
 		0BA7D9912C2C776600996C54 /* OpponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpponentView.swift; sourceTree = "<group>"; };
 		0BA7D9932C2C77ED00996C54 /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		0BA7D9972C2C790400996C54 /* CentralInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CentralInfoView.swift; sourceTree = "<group>"; };
+		0BB3BD4B2C309DBE00D6DFC0 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaguesListView.swift; sourceTree = "<group>"; };
 		0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouritesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				0B46355E2C25B5E900890BCC /* HomeScreen.swift */,
+				0BB3BD4B2C309DBE00D6DFC0 /* CalendarView.swift */,
 				0B09DA052C2EFA7B00EA0BB4 /* ProfileView.swift */,
 				0BF2BEAD2C2DAF4400177387 /* LeaguesListView.swift */,
 				0BF2BEB12C2DB40A00177387 /* FavouritesView.swift */,
@@ -279,6 +282,7 @@
 				0BA7D97C2C2C737500996C54 /* PlayerModel.swift in Sources */,
 				0BA7D9782C2C735000996C54 /* OpponentElement.swift in Sources */,
 				0BA7D9942C2C77ED00996C54 /* ColorExtension.swift in Sources */,
+				0BB3BD4C2C309DBE00D6DFC0 /* CalendarView.swift in Sources */,
 				0B09DA062C2EFA7B00EA0BB4 /* ProfileView.swift in Sources */,
 				0BA7D9722C2C4F4E00996C54 /* SeriesModel.swift in Sources */,
 				0B4635552C25B59900890BCC /* Persistence.swift in Sources */,

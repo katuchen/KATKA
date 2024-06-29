@@ -81,7 +81,9 @@ class MatchViewModel: ObservableObject {
 		formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
 		
 		let startOfDay = Calendar.current.startOfDay(for: date)
-		let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)
+		let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)
+		let endOfDay = Calendar.current.date(byAdding: .second, value: -1, to: nextDay ?? Date())
+
 		var datesString = ""
 		
 		datesString = formatter.string(from: startOfDay) + "Z," + formatter.string(from: endOfDay ?? startOfDay)

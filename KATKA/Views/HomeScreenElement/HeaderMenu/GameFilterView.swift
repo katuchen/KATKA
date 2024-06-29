@@ -46,7 +46,5 @@ struct GameFilterView : View {
 			}
 			
 		}
-		.padding(.horizontal, 40)
-		.frame(maxWidth: .infinity, alignment: .trailing)
 	}
 }
