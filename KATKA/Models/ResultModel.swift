@@ -1,5 +1,3 @@
-import SwiftUI
-
 struct ResultsModel : Codable {
 	let score: Int?
 	let teamID: Int?

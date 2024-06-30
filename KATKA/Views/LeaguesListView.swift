@@ -1,16 +1,21 @@
 import SwiftUI
 
 struct LeaguesListView: View {
-	let matches: [MatchModel]
+	let leagues: [LeagueModel]
 	
 	var body: some View {
 		NavigationStack {
 			ZStack {
 				backGround
-				List(matches) { match in
-					Text("\(match.league?.id ?? 0)")
+				List(leagues) { league in
+					NavigationLink {
+						LeagueInfoView(league: league)
+					} label: {
+						Text(league.name ?? "")
+
+					}
 				}
-				.listStyle(.grouped)
+				.listStyle(.automatic)
 				.scrollContentBackground(.hidden)
 			}
 			.navigationTitle("Leagues")

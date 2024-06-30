@@ -1,5 +1,3 @@
-import SwiftUI
-
 struct PlayerModel : Identifiable, Codable {
 	let id: Int
 	let name: String?

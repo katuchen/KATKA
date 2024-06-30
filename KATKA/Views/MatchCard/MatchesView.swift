@@ -7,8 +7,8 @@ struct MatchesView : View {
 	@State private var primaryColor2: Color = .clear
 	
 	var body: some View {
-		let opponentFirst = match.opponents.first?.opponent
-		let opponentSecond = match.opponents.last?.opponent
+		let opponentFirst = match.opponents?.first?.opponent
+		let opponentSecond = match.opponents?.last?.opponent
 		
 		HStack {
 			OpponentView(

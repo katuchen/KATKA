@@ -10,7 +10,7 @@ struct HomeScreen: View {
 				.tabItem {
 					Label("Matches", systemImage: "gamecontroller.fill")
 				}
-			LeaguesListView(matches: vm.matches)
+			LeaguesListView(leagues: vm.leagues)
 				.tabItem {
 					Label("Leagues", systemImage: "chart.bar.doc.horizontal")
 				}

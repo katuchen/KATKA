@@ -1,5 +1,3 @@
-import SwiftUI
-
 struct MatchModel : Identifiable, Codable, Equatable {
 	static func == (lhs: MatchModel, rhs: MatchModel) -> Bool {
 		return lhs.id == rhs.id
@@ -13,7 +11,7 @@ struct MatchModel : Identifiable, Codable, Equatable {
 	let matchType: String?
 	let name: String?
 	let numberOfGames: Int?
-	let opponents: [OpponentElement]
+	let opponents: [OpponentElement]?
 	let results: [ResultsModel]?
 	let serie: SeriesModel?
 	let serieID: Int?

@@ -1,5 +1,3 @@
-import SwiftUI
-
 struct SeriesModel : Identifiable, Codable {
 	let id, leagueID: Int
 	let name: String?

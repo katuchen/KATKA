@@ -2,7 +2,7 @@ import SwiftUI
 
 struct GameFilterView : View {
 	@Binding var gameSelected : String
-	let slugToName: [VideogameModel.slug: VideogameModel.name] = [
+	let slugToName: [VideogameModel.GameSlug: VideogameModel.GameName] = [
 		.cs: .cs,
 		.dota: .dota,
 		.leagueOfLegends: .leagueOfLegends,
@@ -26,7 +26,7 @@ struct GameFilterView : View {
 				Button("All games") {
 					gameSelected = MatchViewModel.allGames
 				}
-				ForEach(VideogameModel.slug.allCases, id: \.self) { slug in
+				ForEach(VideogameModel.GameSlug.allCases, id: \.self) { slug in
 					if let name = slugToName[slug] {
 						Button(name.rawValue) {
 							gameSelected = slug.rawValue

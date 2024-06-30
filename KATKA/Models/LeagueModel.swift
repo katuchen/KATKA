@@ -6,6 +6,7 @@ struct LeagueModel : Identifiable, Codable {
 	let name: String?
 	let slug: String?
 	let url: String?
+	let videogame : VideogameModel?
 	
 	enum CodingKeys: String, CodingKey {
 		case id
@@ -13,5 +14,6 @@ struct LeagueModel : Identifiable, Codable {
 		case name
 		case slug
 		case url
+		case videogame
 	}
 }

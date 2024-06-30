@@ -1,30 +1,19 @@
 import SwiftUI
 
-struct VideogameModel : Codable {
-	enum id : Int, CaseIterable {
-		case cs = 3
-		case dota = 4
-		case leagueOfLegends = 1
-		case valorant = 26
-		case codMW = 23
-		case fifa = 25
-		case kog = 27
-		case lolWildRift = 28
-		case mlbb = 34
-		case overwatch = 14
-		case pubg = 20
-		case r6Siege = 24
-		case rocketLeague = 22
-		case starcraft2 = 29
-		case starcraftBW = 30
-	}
-	enum name : String, CaseIterable {
+struct VideogameModel: Identifiable, Codable {
+	let id: Int
+	let name: GameName
+	let slug: GameSlug
+	let leagues: [LeagueModel]?
+	let url: URL?
+	
+	enum GameName: String, Codable, CaseIterable {
 		case cs = "Counter-Strike"
 		case dota = "Dota 2"
 		case leagueOfLegends = "LoL"
 		case valorant = "Valorant"
 		case codMW = "Call of Duty"
-		case fifa = "EA Sports FC 24"
+		case fifa = "EA Sports FC"
 		case kog = "King of Glory"
 		case lolWildRift = "LoL Wild Rift"
 		case mlbb = "Mobile Legends: Bang Bang"
@@ -35,7 +24,8 @@ struct VideogameModel : Codable {
 		case starcraft2 = "StarCraft 2"
 		case starcraftBW = "StarCraft Brood War"
 	}
-	enum slug: String, CaseIterable {
+	
+	enum GameSlug: String, Codable, CaseIterable {
 		case cs = "cs-go"
 		case dota = "dota-2"
 		case leagueOfLegends = "league-of-legends"
@@ -52,10 +42,11 @@ struct VideogameModel : Codable {
 		case starcraft2 = "starcraft-2"
 		case starcraftBW = "starcraft-brood-war"
 	}
-	let leagues : [LeagueModel]?
-	let url: URL?
 	
 	enum CodingKeys: String, CodingKey {
+		case id
+		case name
+		case slug
 		case leagues
 		case url
 	}
